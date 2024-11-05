@@ -14,7 +14,7 @@ func (s Service) SaveContent(fileName string) error{
 	//decode content
 
 
-	openedFile, err := os.Open(s.FileLocation+fileName)
+	openedFile, err := os.Open(s.FileLocation + fileName)
 
 	if err != nil {
 		return fmt.Errorf("could not open file: %s",err.Error())
@@ -33,7 +33,7 @@ func (s Service) SaveContent(fileName string) error{
 		if n > 0 {
 			decodeChunk, _, decodeErr := transform.Bytes(s.Decoder, buffer[:n])
 			if decodeErr != nil {
-				return fmt.Errorf("decoding error :%w",decodeErr.Error())
+				return fmt.Errorf("decoding error :%s",decodeErr.Error())
 			}
 			data := s.ProccessTextToSlice(string(decodeChunk))
 

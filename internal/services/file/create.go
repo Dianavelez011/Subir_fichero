@@ -9,7 +9,6 @@ import (
 
 func (s Service)Create(ctx *gin.Context, file *multipart.FileHeader)error {
 	//validate type file
-	//save file in uploads
 	//clean file if type file is .txt
 	//save in database
 	//response success
@@ -19,10 +18,6 @@ func (s Service)Create(ctx *gin.Context, file *multipart.FileHeader)error {
 	if err != nil {
 		fmt.Printf("error: %s",err.Error());
 		return fmt.Errorf("error unsupported media type:%s",err.Error())
-	}
-
-	if err := ctx.SaveUploadedFile(file, "./uploads/"+file.Filename); err != nil {
-		return fmt.Errorf("could not save file:%s",err.Error())
 	}
 
 

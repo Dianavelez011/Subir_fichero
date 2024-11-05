@@ -8,7 +8,7 @@ import (
 )
 
 func (s Service)Create(ctx *gin.Context, file *multipart.FileHeader)error {
-	if err := ctx.SaveUploadedFile(file, s.FileLocation); err != nil {
+	if err := ctx.SaveUploadedFile(file, s.FileLocation + file.Filename); err != nil {
 		return fmt.Errorf("could not save file:%s",err.Error())
 	}
 
