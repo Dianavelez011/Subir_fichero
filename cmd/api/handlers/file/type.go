@@ -1,4 +1,4 @@
-package services
+package file
 
 import (
 	"fmt"
@@ -14,9 +14,7 @@ var allowedMimeTypes = map[string]bool{
 }
 
 
-func TypeFile(fileName string) (string,error){
-	
-	
+func (h Handler)TypeFile(fileName string) (string,error){
 	//Fallar si el tipo de archivo no esta permitido
 	ext := filepath.Ext(fileName)
 	if !allowedMimeTypes[ext] {

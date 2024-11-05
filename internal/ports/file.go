@@ -7,5 +7,9 @@ import (
 )
 
 type FileService interface {
-	Create(ctx *gin.Context, file *multipart.FileHeader)
+	Create(ctx *gin.Context, file *multipart.FileHeader) error
+}
+
+type FileRepository interface {
+	InsertOrUpdate(query string, values []interface{}) error
 }
