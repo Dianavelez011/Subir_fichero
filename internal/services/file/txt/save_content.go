@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"golang.org/x/text/transform"
-	"github.com/gin/internal/services/file"
 )
 
 func (s Service) SaveContent(fileName string) error{
@@ -37,7 +36,7 @@ func (s Service) SaveContent(fileName string) error{
 			}
 			data := s.ProccessTextToSlice(string(decodeChunk))
 
-			rowsInterface := file.ToInterfaceSlice(data)
+			rowsInterface := s.ToInterfaceSlice(data)
 			// (string(decodeChunk), 53, "UNIDAD VICTIMAS")
 			s.Repo.CopyFrom(s.Columns,rowsInterface,s.TableName)
 			fmt.Println(data)

@@ -9,4 +9,5 @@ type Service struct {
 	FileLocation string
 	Columns []string
 	TableName string
+	TabRow int
 }
