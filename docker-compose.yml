@@ -1,0 +1,23 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres_buscador
+    environment:
+      POSTGRES_DB: db_buscador
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_buscador_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d db_buscador"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_buscador_data:
+    driver: local
