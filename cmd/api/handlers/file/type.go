@@ -18,7 +18,7 @@ func (h Handler)TypeFile(fileName string) (string,error){
 	//Fallar si el tipo de archivo no esta permitido
 	ext := filepath.Ext(fileName)
 	if !allowedMimeTypes[ext] {
-		return "",fmt.Errorf("type file %s dont allowed:",ext)
+		return "", fmt.Errorf("type file %s dont allowed:",ext)
 	}
 
 	return ext,nil

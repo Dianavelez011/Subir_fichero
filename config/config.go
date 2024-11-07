@@ -16,7 +16,16 @@ var (
 )
 
 func InitFileService(repo postgresql.Repository)(*internalService.Service){
+	
 
+	fileSrv := internalService.Service{
+		Repo: repo,
+	}
+
+	return &fileSrv
+}
+
+func InitExcelService(repo postgresql.Repository)*excel.Service{
 	excelService := excel.Service{
 		Repo: repo,
 		FileLocation: fileLocation,
@@ -24,7 +33,10 @@ func InitFileService(repo postgresql.Repository)(*internalService.Service){
 		TableName: tableName,
 		TabRow: tabRow,
 	}
+	return &excelService
+}
 
+func InitTxtService(repo postgresql.Repository)*txt.Service{
 	txtService := txt.Service{
 		Repo: repo,
 		Decoder: charmap.ISO8859_1.NewDecoder(),
@@ -35,16 +47,8 @@ func InitFileService(repo postgresql.Repository)(*internalService.Service){
 		FilterWords: []string{"UNIDAD VICTIMAS","NULL"},
 		Columns: columns,
 		TableName: tableName,
+		MainFileName: "main",
 	}
 
-	// ginEngine := gin.Default()
-
-	
-	fileSrv := internalService.Service{
-		Repo: repo,
-		ExcelService: excelService,
-		TxtService: txtService,
-	}
-
-	return &fileSrv
+	return &txtService
 }

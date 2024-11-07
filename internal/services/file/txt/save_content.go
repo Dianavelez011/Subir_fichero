@@ -7,13 +7,16 @@ import (
 	"golang.org/x/text/transform"
 )
 
-func (s Service) SaveContent(fileName string) error{
+func (s Service) SaveContent() error{
 	//open file
 	//read file
 	//decode content
+	//save in database
 
+	//mainfile path
+	mainFilePath := s.FileLocation + s.MainFileName + ".txt"
 
-	openedFile, err := os.Open(s.FileLocation + fileName)
+	openedFile, err := os.Open(mainFilePath)
 
 	if err != nil {
 		return fmt.Errorf("could not open file: %s",err.Error())

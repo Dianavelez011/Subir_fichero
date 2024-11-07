@@ -4,9 +4,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/gin/cmd/api/handlers/file"
+	// "github.com/gin/cmd/api/handlers/file"
 	"github.com/gin/cmd/api/routes"
 	"github.com/gin/config"
+	// "github.com/gin/config"
 	"github.com/gin/internal/repositories/postgresql"
 	"github.com/gin/internal/repositories/postgresql/connection"
 	"github.com/joho/godotenv"
@@ -29,12 +30,7 @@ func main() {
 		Connection: connectPool,
 	}
 
-	fileSrv := config.InitFileService(repo)
-
-	
-	handler := file.Handler{
-		FileService: fileSrv,
-	}
+	handler := config.ConfigAllServices(repo)
 
 	routes := routes.Router{
 		Handler: handler,

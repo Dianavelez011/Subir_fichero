@@ -1,12 +1,10 @@
 package file
 
 import (
-	"github.com/gin/internal/ports/file/excel"
-	"github.com/gin/internal/ports/file/txt"
+	"github.com/gin/internal/ports/file"
 )
 
 type Service struct {
-	Repo excel.FileRepository
-	ExcelService excel.FileService
-	TxtService  txt.FileService
+	Repo file.FileRepository
+
 }

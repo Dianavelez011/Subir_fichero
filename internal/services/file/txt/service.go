@@ -15,4 +15,5 @@ type Service struct {
 	FilterWords []string
 	Columns []string
 	TableName string
+	MainFileName string
 }

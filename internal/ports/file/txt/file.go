@@ -7,7 +7,7 @@ import (
 )
 
 type FileService interface {
-	Create(ctx *gin.Context, file *multipart.FileHeader)error
+	Create(ctx *gin.Context,file *multipart.FileHeader,sizeMainFile int )error
 }
 
 type FileRepository interface {
