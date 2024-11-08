@@ -1,13 +1,13 @@
 package txt
 
 import (
+	"context"
 	"mime/multipart"
-
-	"github.com/gin-gonic/gin"
+	"sync"
 )
 
 type FileService interface {
-	Create(ctx *gin.Context,file *multipart.FileHeader,sizeMainFile int )error
+	Create(ctx context.Context, file *multipart.FileHeader, sizeMainFile int,channel chan error,wg *sync.WaitGroup)
 }
 
 type FileRepository interface {

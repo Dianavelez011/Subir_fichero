@@ -6,25 +6,35 @@ import (
 	"mime/multipart"
 	"os"
 
-	"github.com/gin-gonic/gin"
 )
 
 var (
-	sizeMainFile int
-	sizeComplete int
+	mapSizeMainFile = make(map[string]map[string]int)
 )
 
-func (s Service) Join(ctx *gin.Context, partFile *multipart.FileHeader, sizeMain int) (bool, error) {
+func (s Service) Join(partFile *multipart.FileHeader, sizeMain int,fileName string) (bool, error) {
 	//create or open main file
 	//open part of the file
 	//read chunk content in buffer
 	//write chunk in main file
 
-	mainFilePath := s.FileLocation + s.MainFileName + ".txt"
-	//Initial value to sizeMainFile
-	if sizeMainFile == 0 {
-		sizeMainFile = sizeMain
+	mainFilePath := s.FileLocation + fileName
+	valueMap,exists := mapSizeMainFile[fileName];
+
+	if !exists{
+		mapSizeMainFile[fileName] = map[string]int{
+			"sizeMainFile": sizeMain,
+			"sizeCompleted": 0,
+		}
+
+		valueMap = mapSizeMainFile[fileName]
 	}
+
+	
+	//Initial value to sizeMainFile
+	// if sizeMainFile == 0 {
+	// 	sizeMainFile = sizeMain
+	// }
 	//opoen file if not exist it will create new file
 	file, err := os.OpenFile(mainFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -55,11 +65,16 @@ func (s Service) Join(ctx *gin.Context, partFile *multipart.FileHeader, sizeMain
 		}
 	}
 
-	sizeComplete += int(partFile.Size)
+	// sizeComplete += int(partFile.Size)
+	valueMap["sizeCompleted"] += int(partFile.Size)
 
-	if sizeComplete == sizeMainFile {
-		sizeMainFile = 0
-		sizeComplete = 0
+	// if sizeComplete == sizeMainFile {
+	// 	sizeMainFile = 0
+	// 	sizeComplete = 0
+	// 	return true, nil
+	// }
+	if valueMap["sizeCompleted"] == valueMap["sizeMainFile"] {
+		delete(mapSizeMainFile,fileName)
 		return true, nil
 	}
 

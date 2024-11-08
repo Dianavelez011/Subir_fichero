@@ -4,17 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	// "sync"
+
 	"golang.org/x/text/transform"
 )
 
-func (s Service) SaveContent() error{
+func (s Service) SaveContent(mainFilePath string)error{
 	//open file
 	//read file
 	//decode content
 	//save in database
 
 	//mainfile path
-	mainFilePath := s.FileLocation + s.MainFileName + ".txt"
 
 	openedFile, err := os.Open(mainFilePath)
 
@@ -24,12 +25,13 @@ func (s Service) SaveContent() error{
 
 	//Cerrar el archivo
 	defer openedFile.Close()
+	//close waitGroup
+	// defer wg.Done()
 
 	reader := bufio.NewReader(openedFile)
 	//Tamaño buffer 125mb
 	buffer := make([]byte, 125*1024*1024)
 
-	// decoder := charmap.ISO8859_1.NewDecoder()
 	for {
 		n, err := reader.Read(buffer)
 		if n > 0 {
@@ -42,14 +44,14 @@ func (s Service) SaveContent() error{
 			rowsInterface := s.ToInterfaceSlice(data)
 			// (string(decodeChunk), 53, "UNIDAD VICTIMAS")
 			s.Repo.CopyFrom(s.Columns,rowsInterface,s.TableName)
-			fmt.Println(data)
+			// fmt.Println(data)
 		}
 
 		if err != nil {
 			if err.Error() == "EOF" {
 				break
 			}
-			return fmt.Errorf("could not read file in SaveContent:%s",err.Error())
+			 return fmt.Errorf("could not read file in SaveContent:%s",err.Error())
 		}
 	}
 	fmt.Println("rows copied succesfully")
