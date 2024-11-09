@@ -18,9 +18,11 @@ func (h Handler) Create(ctx *gin.Context, file *multipart.FileHeader) {
 	//Consumir un servicio
 	//Traducir el response
 
-	contextTimeout, _ := context.WithTimeout(context.Background(), 7*time.Minute)
-	channel := make(chan error)
+	contextTimeout, cancel := context.WithTimeout(context.Background(), 7*time.Minute)
+	channel := make(chan map[string]interface{})
 	var wg sync.WaitGroup
+
+	defer cancel()
 
 	sizeMainFileStr := ctx.PostForm("sizeMainFile")
 	sizeMainFile, err := strconv.Atoi(sizeMainFileStr)
@@ -35,28 +37,28 @@ func (h Handler) Create(ctx *gin.Context, file *multipart.FileHeader) {
 	wg.Add(1)
 	go h.FileService.Create(contextTimeout, file, sizeMainFile, channel, &wg)
 
-		select {
+	select {
 	case <-ctx.Done():
+		if err:= h.FileService.DeleteFolder(); err!=nil{
+			fmt.Printf("failed delete folder:%s",err.Error())
+			return
+		}
 		ctx.JSON(408, gin.H{"error": "timeout waiting for the next fragment request canceled"})
 		return
-	case err := <-channel:
-		if err != nil {
-			// if errors.Is(err, context.DeadlineExceeded) {
-			// 	ctx.JSON(408, gin.H{"error": "timeout waiting for the next fragment request canceled"})
-			// } else {
-				fmt.Printf("filed to create file: %s", err.Error())
-				ctx.JSON(500, gin.H{"error": "failed to create file"})
-			// }
+	case response := <-channel:
+		if err := response["error"]; err != nil {
+			fmt.Printf("filed to create file: %s", err.(error).Error())
+			ctx.JSON(response["code"].(int), gin.H{"error": response["error_message"]})
 			return
+		}else{
+			ctx.JSON(200, gin.H{"message": "txt file upload success!"})
 		}
 
 	}
 
-		wg.Wait()
-		close(channel)
+	wg.Wait()
+	close(channel)
 
 	//-----------------------------------------------------------
-
-	ctx.JSON(200, gin.H{"message": "txt file upload success!"})
 
 }

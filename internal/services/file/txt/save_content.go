@@ -3,9 +3,13 @@ package txt
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
+	"sync"
+
 	// "sync"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/text/transform"
 )
 
@@ -18,6 +22,8 @@ func (s Service) SaveContent(mainFilePath string)error{
 	//mainfile path
 
 	openedFile, err := os.Open(mainFilePath)
+	channel  := make(chan map[string]interface{})
+	var wg sync.WaitGroup
 
 	if err != nil {
 		return fmt.Errorf("could not open file: %s",err.Error())
@@ -25,6 +31,7 @@ func (s Service) SaveContent(mainFilePath string)error{
 
 	//Cerrar el archivo
 	defer openedFile.Close()
+	
 	//close waitGroup
 	// defer wg.Done()
 
@@ -35,6 +42,7 @@ func (s Service) SaveContent(mainFilePath string)error{
 	for {
 		n, err := reader.Read(buffer)
 		if n > 0 {
+			fmt.Println("Linea 40")
 			decodeChunk, _, decodeErr := transform.Bytes(s.Decoder, buffer[:n])
 			if decodeErr != nil {
 				return fmt.Errorf("decoding error :%s",decodeErr.Error())
@@ -43,17 +51,32 @@ func (s Service) SaveContent(mainFilePath string)error{
 
 			rowsInterface := s.ToInterfaceSlice(data)
 			// (string(decodeChunk), 53, "UNIDAD VICTIMAS")
-			s.Repo.CopyFrom(s.Columns,rowsInterface,s.TableName)
+			wg.Add(1)
+			go s.Repo.CopyFrom(s.Columns,rowsInterface,s.TableName,channel,&wg)
+
+			if err:= <-channel; err["error"] != nil{
+				return fmt.Errorf("error could not execute copyfrom in SaveContent:%s",err["error"].(error).Error())
+			}
+			wg.Wait()
 			// fmt.Println(data)
 		}
 
 		if err != nil {
-			if err.Error() == "EOF" {
+			fmt.Println("Linea 54")
+
+			if err == io.EOF {
 				break
 			}
 			 return fmt.Errorf("could not read file in SaveContent:%s",err.Error())
 		}
+		fmt.Println("Linea 61")
+
 	}
+	dbConnection := <-channel
+	close(channel)
+	defer dbConnection["db_connection"].(*pgxpool.Pool).Close()
+
+
 	fmt.Println("rows copied succesfully")
 
 	return nil

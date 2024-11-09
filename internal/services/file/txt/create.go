@@ -2,17 +2,22 @@ package txt
 
 import (
 	"context"
-	"fmt"
 	"mime/multipart"
 	"sync"
 )
 
-func (s Service) Create(ctx context.Context, file *multipart.FileHeader, sizeMainFile int,channel chan error,wg *sync.WaitGroup) {
+func (s Service) Create(ctx context.Context, file *multipart.FileHeader, sizeMainFile int,channel chan map[string]interface{},wg *sync.WaitGroup) {
 	//validate
 	// join file
 	// save file
 	//save content
-	fmt.Println(sizeMainFile)
+	cleanFileName := s.CleanName(file.Filename)
+	mainFilePath := s.FileLocation + cleanFileName
+	response := map[string]interface{}{
+		"error": nil,
+		"error_message": "Internal server error",
+		"code": 500,
+	}
 
 	// var wg sync.WaitGroup
 	// channel := make(chan error)
@@ -21,33 +26,45 @@ func (s Service) Create(ctx context.Context, file *multipart.FileHeader, sizeMai
 
 
 	if err := s.ValidateChunk(file.Filename, "parte"); err != nil {
-		channel <- err
+		response["error"] = err
+		response["error_message"] = "File stream submission failed";
+		response["code"] = 400
+		channel <- response
 		return
 	}
 	//clean file name
 	
-	cleanFileName := s.CleanName(file.Filename)
-	mainFilePath := s.FileLocation + cleanFileName
+	
 	buitFile, err := s.Join(file, sizeMainFile, cleanFileName)
 
 	if err != nil {
-		channel <- fmt.Errorf("failed join file:%s", err.Error())
+		response["error"] = err
+		s.Delete(mainFilePath)
+		channel <- response
+		return
+	}
+	
+
+	if !buitFile {
+		channel <- response
 		return
 	}
 
-	if !buitFile {
-		channel <- nil
-		return
-	}
+	channel <- response
 
 	err = s.SaveContent(mainFilePath)
 
 	if err != nil{
-		channel <- err 
+		response["error"] = err
+		s.Delete(mainFilePath)
+		channel <- response
 		return
+	}else{
+		s.Delete(mainFilePath)
 	}
 
-	channel <- nil 
+
+	// channel <- nil 
 
 
 	// wg.Add(1)

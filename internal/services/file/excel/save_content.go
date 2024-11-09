@@ -2,8 +2,11 @@ package excel
 
 import (
 	"fmt"
+	"sync"
+
 	// "fmt"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -16,6 +19,8 @@ func (s Service)SaveContent(fileName string)error {
 	fmt.Println("SaveContent line 18")
 
 	excel,err := excelize.OpenFile(s.FileLocation+fileName)
+	channel  := make(chan map[string]interface{})
+	var wg sync.WaitGroup
 	fmt.Println("SaveContent line 22")
 
 
@@ -42,10 +47,17 @@ func (s Service)SaveContent(fileName string)error {
 		rowsInterface := s.ToInterfaceSlice(rows);
 
 		//Insertar en la base de datos
-		if err := s.Repo.CopyFrom(s.Columns,rowsInterface,s.TableName); err != nil{
-			return fmt.Errorf("could not execute copyFrom:%s",err.Error())
+		wg.Add(1)
+		go s.Repo.CopyFrom(s.Columns,rowsInterface,s.TableName,channel,&wg)
+		if err:= <-channel; err["error"].(error) != nil{
+			return fmt.Errorf("error could not execute copyfrom in SaveContent:%s",err["error"].(error).Error())
 		}
-
+		wg.Done()
+		
 	}
+	dbConnection := <-channel
+	close(channel)
+
+	defer dbConnection["db_connection"].(*pgxpool.Pool).Close()
 	return nil
 }
