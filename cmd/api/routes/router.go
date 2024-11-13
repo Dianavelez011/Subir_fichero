@@ -2,7 +2,6 @@ package routes
 
 import (
 	"fmt"
-
 	"github.com/gin/cmd/api/handlers/file"
 )
 
@@ -18,6 +17,7 @@ func (r Router)Routes() {
 	// routes.POST("/", createEvent)               // Crear un nuevo registro
     // routes.GET("/:cedula", getEventByCedula)
     routes.POST("/upload", r.Handler.Create)
+    routes.POST("/delete", r.Handler.Delete)
 
 	// Ejecutar el servidor
 	if err := ginEngine.Run(":8081"); err != nil {

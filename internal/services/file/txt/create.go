@@ -1,12 +1,13 @@
 package txt
 
 import (
-	"context"
 	"mime/multipart"
-	"sync"
+	// "sync"
+
+	"github.com/gin-gonic/gin"
 )
 
-func (s Service) Create(ctx context.Context, file *multipart.FileHeader, sizeMainFile int,channel chan map[string]interface{},wg *sync.WaitGroup) {
+func (s Service) Create(ctx *gin.Context, file *multipart.FileHeader, sizeMainFile int,channel chan <- map[string]interface{}) {
 	//validate
 	// join file
 	// save file
@@ -17,12 +18,14 @@ func (s Service) Create(ctx context.Context, file *multipart.FileHeader, sizeMai
 		"error": nil,
 		"error_message": "Internal server error",
 		"code": 500,
+		"upload_file": false,
+		"path_file":"",
 	}
 
 	// var wg sync.WaitGroup
 	// channel := make(chan error)
 
-	defer wg.Done()
+	// defer wg.Done()
 
 
 	if err := s.ValidateChunk(file.Filename, "parte"); err != nil {
@@ -30,6 +33,7 @@ func (s Service) Create(ctx context.Context, file *multipart.FileHeader, sizeMai
 		response["error_message"] = "File stream submission failed";
 		response["code"] = 400
 		channel <- response
+		s.Delete(mainFilePath)
 		return
 	}
 	//clean file name
@@ -48,20 +52,29 @@ func (s Service) Create(ctx context.Context, file *multipart.FileHeader, sizeMai
 	if !buitFile {
 		channel <- response
 		return
-	}
-
-	channel <- response
-
-	err = s.SaveContent(mainFilePath)
-
-	if err != nil{
-		response["error"] = err
-		s.Delete(mainFilePath)
+	}else{
+		response["upload_file"] = true
+		response["path_file"] = mainFilePath
 		channel <- response
 		return
-	}else{
-		s.Delete(mainFilePath)
 	}
+
+
+	// fmt.Println("Linea 55")
+	// ctx.JSON(200, gin.H{"message": "txt file upload success!"})
+
+
+	// err = s.SaveContent(mainFilePath)
+
+	// if err != nil{
+	// 	response["error"] = err
+	// 	s.Delete(mainFilePath)
+	// 	channel <- response
+	// 	return
+	// }else{
+	// 	s.Delete(mainFilePath)
+	// 	channel <- response
+	// }
 
 
 	// channel <- nil 

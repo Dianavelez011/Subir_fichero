@@ -7,13 +7,13 @@ import (
 	"os"
 	"sync"
 
+	// "github.com/jackc/pgx/v5/pgxpool"
 	// "sync"
-
-	"github.com/jackc/pgx/v5/pgxpool"
+	// "github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/text/transform"
 )
 
-func (s Service) SaveContent(mainFilePath string)error{
+func (s Service) SaveContent(mainFilePath string) error {
 	//open file
 	//read file
 	//decode content
@@ -22,16 +22,17 @@ func (s Service) SaveContent(mainFilePath string)error{
 	//mainfile path
 
 	openedFile, err := os.Open(mainFilePath)
-	channel  := make(chan map[string]interface{})
+	channel := make(chan map[string]interface{})
 	var wg sync.WaitGroup
+	// var db_connection *pgxpool.Pool
 
 	if err != nil {
-		return fmt.Errorf("could not open file: %s",err.Error())
+		return fmt.Errorf("could not open file: %s", err.Error())
 	}
 
 	//Cerrar el archivo
 	defer openedFile.Close()
-	
+
 	//close waitGroup
 	// defer wg.Done()
 
@@ -48,16 +49,23 @@ func (s Service) SaveContent(mainFilePath string)error{
 				return fmt.Errorf("decoding error :%s",decodeErr.Error())
 			}
 			data := s.ProccessTextToSlice(string(decodeChunk))
+			dataFilter := s.FilterRows(data)
 
-			rowsInterface := s.ToInterfaceSlice(data)
+			rowsInterface := s.ToInterfaceSlice(dataFilter)
 			// (string(decodeChunk), 53, "UNIDAD VICTIMAS")
 			wg.Add(1)
-			go s.Repo.CopyFrom(s.Columns,rowsInterface,s.TableName,channel,&wg)
+			go s.Repo.CopyFrom(s.Columns, rowsInterface, s.TableName, channel, &wg)
 
-			if err:= <-channel; err["error"] != nil{
-				return fmt.Errorf("error could not execute copyfrom in SaveContent:%s",err["error"].(error).Error())
+			if err := <-channel; err["error"] != nil {
+				return fmt.Errorf("error could not execute copyfrom in SaveContent:%s", err["error"].(error).Error())
 			}
-			wg.Wait()
+			// else{
+			// 	result := <-channel
+			// 	db_connection = result["db_connection"].(*pgxpool.Pool)
+				
+			// }
+			
+
 			// fmt.Println(data)
 		}
 
@@ -65,19 +73,22 @@ func (s Service) SaveContent(mainFilePath string)error{
 			fmt.Println("Linea 54")
 
 			if err == io.EOF {
+				fmt.Println("Linea 68")
 				break
+
 			}
-			 return fmt.Errorf("could not read file in SaveContent:%s",err.Error())
+			fmt.Println("Linea 79")
+
+			return fmt.Errorf("could not read file in SaveContent:%s", err.Error())
 		}
 		fmt.Println("Linea 61")
 
 	}
-	dbConnection := <-channel
+	wg.Wait()
+	// db_connection.Close()
 	close(channel)
-	defer dbConnection["db_connection"].(*pgxpool.Pool).Close()
-
-
 	fmt.Println("rows copied succesfully")
 
 	return nil
+
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func (s Service)SaveContent(fileName string)error {
+func (s Service)SaveContent(mainFilePath string)error {
 	//open file
 	//get content
 	//translate content
@@ -18,7 +18,7 @@ func (s Service)SaveContent(fileName string)error {
 
 	fmt.Println("SaveContent line 18")
 
-	excel,err := excelize.OpenFile(s.FileLocation+fileName)
+	excel,err := excelize.OpenFile(mainFilePath)
 	channel  := make(chan map[string]interface{})
 	var wg sync.WaitGroup
 	fmt.Println("SaveContent line 22")
@@ -52,7 +52,7 @@ func (s Service)SaveContent(fileName string)error {
 		if err:= <-channel; err["error"].(error) != nil{
 			return fmt.Errorf("error could not execute copyfrom in SaveContent:%s",err["error"].(error).Error())
 		}
-		wg.Done()
+		wg.Wait()
 		
 	}
 	dbConnection := <-channel

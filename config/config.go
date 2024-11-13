@@ -1,10 +1,10 @@
 package config
 
-import(
-	"github.com/gin/internal/services/file/excel"
-	"github.com/gin/internal/services/file/txt"
+import (
 	"github.com/gin/internal/repositories/postgresql"
 	internalService "github.com/gin/internal/services/file"
+	"github.com/gin/internal/services/file/excel"
+	"github.com/gin/internal/services/file/txt"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -40,6 +40,7 @@ func InitTxtService(repo postgresql.Repository)*txt.Service{
 	txtService := txt.Service{
 		Repo: repo,
 		Decoder: charmap.ISO8859_1.NewDecoder(),
+		// Decoder: nil,
 		FileLocation: fileLocation,
 		Character: "»",
 		DefaultValue: "NULL",

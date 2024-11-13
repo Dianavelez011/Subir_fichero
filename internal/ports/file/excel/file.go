@@ -1,14 +1,14 @@
 package excel
 
 import (
+	"context"
 	"mime/multipart"
 	"sync"
-
-	"github.com/gin-gonic/gin"
 )
 
 type FileService interface {
-	Create(ctx *gin.Context, file *multipart.FileHeader)error
+	Create(ctx context.Context, file *multipart.FileHeader, sizeMainFile int,channel chan map[string]interface{},wg *sync.WaitGroup) 
+	DeleteFolder() error
 }
 
 type FileRepository interface {
