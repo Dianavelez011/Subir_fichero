@@ -9,12 +9,17 @@ import (
 var(
 	
 	validateNumber = make(map[string]int)
-	keysValidateNumber []string
+	// keysValidateNumber []string
 )
 
-func (s Service)ValidateChunk(fileName string,word string) (error){
+func (s *Service)ValidateChunk(fileName string,word string) (error){
 	//get part file number
 	//clean name
+
+	if s.UploadFile{
+		validateNumber = make(map[string]int)
+		s.UploadFile = false
+	}
 
 
 	re := regexp.MustCompile(fmt.Sprintf(`%s(\d+)`, word))
@@ -37,7 +42,7 @@ func (s Service)ValidateChunk(fileName string,word string) (error){
 	if !exists{
 		validateNumber[cleanFileName] = 1
 		valueValidateNumber = validateNumber[cleanFileName]
-		keysValidateNumber =  append(keysValidateNumber,cleanFileName)
+		// keysValidateNumber =  append(keysValidateNumber,cleanFileName)
 	}
 
 	fmt.Printf("Numero: %d valueValidate: %d",number,valueValidateNumber)
@@ -46,12 +51,12 @@ func (s Service)ValidateChunk(fileName string,word string) (error){
 		return fmt.Errorf("file send sequence failed")
 	}
 
-	if len(keysValidateNumber) >= 5{
-		for i:=0; i<2; i++{
-			delete(validateNumber,keysValidateNumber[i])
-		}
-		keysValidateNumber = keysValidateNumber[2:]
-	}
+	// if len(keysValidateNumber) > 1{
+	// 	for i:=1; i<2; i++{
+	// 		delete(validateNumber,keysValidateNumber[i-1])
+	// 	}
+	// 	keysValidateNumber = keysValidateNumber[1:]
+	// }
 
 	validateNumber[cleanFileName] +=1 
 	return nil

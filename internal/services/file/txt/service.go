@@ -16,4 +16,5 @@ type Service struct {
 	Columns []string
 	TableName string
 	MainFileName string
+	UploadFile bool
 }

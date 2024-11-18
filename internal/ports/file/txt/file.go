@@ -12,6 +12,7 @@ type FileService interface {
 	DeleteFolder() error
 	SaveContent(mainFilePath string) error
 	Delete(mainFilePath string) error
+	CleanName(fileName string) string
 
 }
 

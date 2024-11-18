@@ -5,7 +5,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
-
+	"sync"
 )
 
 var (
@@ -17,6 +17,10 @@ func (s Service) Join(partFile *multipart.FileHeader, sizeMain int,fileName stri
 	//open part of the file
 	//read chunk content in buffer
 	//write chunk in main file
+	var fileMutex sync.Mutex
+
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
 
 	mainFilePath := s.FileLocation + fileName
 	valueMap,exists := mapSizeMainFile[fileName];
@@ -36,6 +40,7 @@ func (s Service) Join(partFile *multipart.FileHeader, sizeMain int,fileName stri
 	// 	sizeMainFile = sizeMain
 	// }
 	//opoen file if not exist it will create new file
+	
 	file, err := os.OpenFile(mainFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return false, fmt.Errorf("unable to open file for appending in Join: %s", err.Error())

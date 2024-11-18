@@ -49,6 +49,7 @@ func InitTxtService(repo postgresql.Repository)*txt.Service{
 		Columns: columns,
 		TableName: tableName,
 		MainFileName: "main",
+		UploadFile: false,
 	}
 
 	return &txtService

@@ -5,7 +5,9 @@ import (
 "fmt"
 )
 
-func (s Service) Delete(mainFilePath string) error{
+func (s *Service) Delete(fileName string) error{
+	s.UploadFile = true;
+	mainFilePath := s.FileLocation + fileName
 	err := os.Remove(mainFilePath)
 
 	if err != nil{

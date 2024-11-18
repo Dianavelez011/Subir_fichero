@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (s Service) Create(ctx *gin.Context, file *multipart.FileHeader, sizeMainFile int,channel chan <- map[string]interface{}) {
+func (s *Service) Create(ctx *gin.Context, file *multipart.FileHeader, sizeMainFile int,channel chan <- map[string]interface{}) {
 	//validate
 	// join file
 	// save file
@@ -26,6 +26,10 @@ func (s Service) Create(ctx *gin.Context, file *multipart.FileHeader, sizeMainFi
 	// channel := make(chan error)
 
 	// defer wg.Done()
+	// if s.CancelUploadFile{
+	// 	channel <- response
+	// 	return
+	// }
 
 
 	if err := s.ValidateChunk(file.Filename, "parte"); err != nil {
@@ -33,7 +37,7 @@ func (s Service) Create(ctx *gin.Context, file *multipart.FileHeader, sizeMainFi
 		response["error_message"] = "File stream submission failed";
 		response["code"] = 400
 		channel <- response
-		s.Delete(mainFilePath)
+		s.Delete(cleanFileName)
 		return
 	}
 	//clean file name
@@ -43,7 +47,7 @@ func (s Service) Create(ctx *gin.Context, file *multipart.FileHeader, sizeMainFi
 
 	if err != nil {
 		response["error"] = err
-		s.Delete(mainFilePath)
+		s.Delete(cleanFileName)
 		channel <- response
 		return
 	}
@@ -53,6 +57,7 @@ func (s Service) Create(ctx *gin.Context, file *multipart.FileHeader, sizeMainFi
 		channel <- response
 		return
 	}else{
+		s.UploadFile = true
 		response["upload_file"] = true
 		response["path_file"] = mainFilePath
 		channel <- response
