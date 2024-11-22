@@ -13,6 +13,9 @@ var (
 	tableName  string = "ruv_victimas"
 	fileLocation string = "./uploads/"
 	tabRow int = 53
+	querys = map[string]string{
+		"condition_merge": `tgt."ID_PERSONA" = src."ID_PERSONA" AND tgt."ID_HOGAR" = src."ID_HOGAR" AND tgt."IDSINIESTRO" = src."IDSINIESTRO"`,
+	}
 )
 
 func InitFileService(repo postgresql.Repository)(*internalService.Service){
@@ -48,8 +51,10 @@ func InitTxtService(repo postgresql.Repository)*txt.Service{
 		FilterWords: []string{"UNIDAD VICTIMAS","NULL"},
 		Columns: columns,
 		TableName: tableName,
+		TemporaryTable: "ruv_victimas_temp",
 		MainFileName: "main",
 		UploadFile: false,
+		Querys: querys,
 	}
 
 	return &txtService

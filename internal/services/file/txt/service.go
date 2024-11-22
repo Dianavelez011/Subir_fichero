@@ -15,6 +15,8 @@ type Service struct {
 	FilterWords []string
 	Columns []string
 	TableName string
+	TemporaryTable string
 	MainFileName string
 	UploadFile bool
+	Querys map[string]string
 }

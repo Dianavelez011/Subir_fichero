@@ -13,10 +13,12 @@ type FileService interface {
 	SaveContent(mainFilePath string) error
 	Delete(mainFilePath string) error
 	CleanName(fileName string) string
+	SaveMainTable() error
 
 }
 
 type FileRepository interface {
 	// InsertOrUpdate(query string, values []interface{}) error
 	CopyFrom(columns []string, values [][]interface{},tableName string,channel chan map[string]interface{},wg *sync.WaitGroup)
+	Upsert(query string) error
 }

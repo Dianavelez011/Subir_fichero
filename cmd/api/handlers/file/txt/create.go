@@ -19,10 +19,12 @@ func (h Handler) Create(ctx *gin.Context, file *multipart.FileHeader) {
 
 	// contextTimeout, cancel := context.WithTimeout(context.Background(), 7*time.Minute)
 	channel := make(chan map[string]interface{})
-	response := map[string]interface{}{}
-	// var wg sync.WaitGroup
-
-	// defer cancel()
+	response := make(map[string]interface{})
+	mainFilePath := ""
+	mainResponse := map[string]interface{}{
+		"code": 200,
+		"message": "",
+	}
 
 	sizeMainFileStr := ctx.PostForm("sizeMainFile")
 	sizeMainFile, err := strconv.Atoi(sizeMainFileStr)
@@ -34,40 +36,30 @@ func (h Handler) Create(ctx *gin.Context, file *multipart.FileHeader) {
 	}
 
 	//--------------------------------------------
-	// wg.Add(1)
 	go h.FileService.Create(ctx, file, sizeMainFile, channel)
-	// wg.Wait()
 
-	select {
-	case <-ctx.Done():
-		if err := h.FileService.DeleteFolder(); err != nil {
-			fmt.Printf("failed delete folder:%s", err.Error())
-			return
-		}
-		ctx.JSON(408, gin.H{"error": "timeout waiting for the next fragment request canceled"})
-		return
-	case response = <-channel:
+	response = <-channel
 		if err := response["error"]; err != nil {
 			fmt.Printf("filed to create file: %s", err.(error).Error())
-			ctx.JSON(response["code"].(int), gin.H{"error": response["error_message"]})
-			return
+			mainResponse["code"] = response["code"]
+			mainResponse["message"] = response["error_message"]
 		}
-		ctx.JSON(200, gin.H{"message": "txt file upload success!"})	
-	}
-
 
 	if ok := response["upload_file"]; ok.(bool) {
-		// ctx.JSON(200, gin.H{"message": "txt file upload success!"})
-		// wg.Add(1)
-			go h.SaveContent(response["path_file"].(string), channel)
-			if err := <-channel; err["error"] != nil {
-				ctx.JSON(response["code"].(int), gin.H{"error": response["error_message"]})
-				return
+		mainFilePath = response["path_file"].(string)
+
+			go h.SaveContent(mainFilePath, channel)
+			if response = <-channel; response["error"] != nil {
+				mainResponse["code"] = response["code"]
+				mainResponse["message"] = response["error_message"]
+				fmt.Printf("failed save contend in handler SaveContent: %s",response["error"].(error).Error())
 			} else {
+				h.Delete(mainFilePath)
 				fmt.Println("file load in database successfully")
 			}
+
+			ctx.JSON(mainResponse["code"].(int), gin.H{"error": mainResponse["message"]})
 	
-		// wg.Wait()
 
 	}
 

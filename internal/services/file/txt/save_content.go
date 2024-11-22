@@ -54,7 +54,7 @@ func (s Service) SaveContent(mainFilePath string) error {
 			rowsInterface := s.ToInterfaceSlice(dataFilter)
 			// (string(decodeChunk), 53, "UNIDAD VICTIMAS")
 			wg.Add(1)
-			go s.Repo.CopyFrom(s.Columns, rowsInterface, s.TableName, channel, &wg)
+			go s.Repo.CopyFrom(s.Columns, rowsInterface, s.TemporaryTable, channel, &wg)
 
 			if err := <-channel; err["error"] != nil {
 				return fmt.Errorf("error could not execute copyfrom in SaveContent:%s", err["error"].(error).Error())
